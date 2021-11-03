@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+{% load static %}
+{% block navbar %}
+	<li><font color="red";>Welcome,{{request.session.loginuser}}</font></li>
+	<li><a href="{% url 'logout'%}">logout</a></li>             
+{% endblock %}
+{% block blk %}
+			<div id="header">
+				<div class="container">
+					<div class="row">
+						<div class="col-md-3">
+							<div class="header-logo">
+								<a href="#" class="logo">
+									<img  style="border-radius: 50%; margin-top: 15%"  src="/static/img/logob.png" alt="error">
+								</a>
+							</div>
+							<br/>
+							<span><h3 style="color: #FFFFFF">YourReads</h3></span>
+						</div>
+						<div class="col-md-6">
+							<div class="header-search">
+								<form method="POST">
+									{% csrf_token %}
+									<select name="stype" class="input-select">
+										<option value="0">Book Title</option>
+									</select>
+									<input type="text" class="input" placeholder="Search here" name="searchbox">
+									<button name="sbutton" class="search-btn">Search</button>
+								</form>
+							</div>
+						</div>
+						<div class="col-md-3 clearfix">
+							<div class="header-ctn">
+								<div class="menu-toggle">
+									<a href="#">
+										<i class="fa fa-bars"></i>
+										<span>Menu</span>
+									</a>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</header>
+		<nav id="navigation">
+			<div class="container">
+				<div id="responsive-nav"></div>
+			</div>
+		</nav>
+		<div class="section">
+			<div class="container">
+				<div class="row">
+					<div class="col-md-12">
+						<div class="section-title">
+							<h3 class="title">Books You have rated:</h3>
+							<div class="section-nav"></div>
+						</div>
+					</div>
+					<div class="col-md-12">
+						<div class="row">
+							<div class="products-tabs">
+								<div id="tab1" class="tab-pane active">
+									<div class="products-slick" data-nav="#slick-nav-1">
+										{% for books in cartdisplay %}	
+											{% for book in books%}
+										<div class="product">
+											<div class="product-img">
+												<img src="{{book.12}}" alt="">
+											</div>
+											<div class="product-body">
+												<p class="product-category">{{book.1}}</p>
+												<h3 class="product-name"><a href="#">{{book.10}}</a></h3>
+											</div>
+											<div class="add-to-cart">
+											<form method="POST" action="/">
+												{% csrf_token %}
+												<button class="add-to-cart-btn" type="hidden" name="viewbook" value="{{book.0}}"><i class="fa fa-eye"></i>View Book Details</button>
+											</form>
+											</div>
+										</div>
+										{% endfor %}
+									{% endfor %}								
+									</div>
+									<div id="slick-nav-1" class="products-slick-nav"></div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+{% endblock %}

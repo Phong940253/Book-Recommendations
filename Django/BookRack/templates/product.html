@@ -1,0 +1,301 @@
+
+{% extends "base.html" %}
+{% load static %}
+{% block navbar %}
+	<li><font color="red";>Welcome,{{request.session.loginuser}}</font></li>
+	<li><a href="{% url 'logout'%}">logout</a></li>
+                        
+{% endblock %}
+{% block blk %}
+			<div id="header">
+				<div class="container">
+					<div class="row">
+						<div class="col-md-3">
+							<div class="header-logo">
+								<a href="#" class="logo">
+									<img  style="border-radius: 50%; margin-top: 15%"  src="/static/img/logob.png" alt="error">
+								</a>
+							</div>
+							<br/>
+							<span><h3 style="color: #FFFFFF">YourReads</h3></span>
+						</div>
+						<div class="col-md-6">
+							<div class="header-search">
+								<form method="POST">
+									{% csrf_token %}
+									<select name="stype" class="input-select">
+										<option value="0">Book Title</option>
+										
+									</select>
+									<input type="text" class="input" placeholder="Search here" name="searchbox">
+									<button name="sbutton" class="search-btn">Search</button>
+								</form>
+							</div>
+						</div>
+						<div class="col-md-3 clearfix">
+							<div class="header-ctn">
+								<div class="dropdown">
+									<a class="dropdown-toggle" href="/wishlist">
+										<i class="fa fa-star"></i>
+										<span>Show Rated books</span>
+									</a>
+								</div>
+								<div class="menu-toggle">
+									<a href="#">
+										<i class="fa fa-bars"></i>
+										<span>Menu</span>
+									</a>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</header>
+		<nav id="navigation">
+			<div class="container">
+				<div id="responsive-nav"></div>
+			</div>
+		</nav>
+		<div class="section">
+			<div class="container">
+				<div class="row">
+					<div class="col-md-5 col-md-push-2">
+						{% for book in viewbook%}
+							{{book.10}}
+						<div id="product-main-img">
+							<div class="product-preview">
+								<img src="{{book.12}}" alt="">
+							</div>
+
+							
+						</div>
+					</div>
+					<div class="col-md-2  col-md-pull-5">
+						<div id="product-imgs">
+							<div class="product-preview">
+								<img src="{{book.12}}" alt="">
+							</div>
+						</div>
+					</div>
+
+<style>
+    .rating {
+    unicode-bidi: bidi-override;
+    color: #c5c5c5;
+    font-size: 25px;
+    height: 25px;
+    width: 100px;
+    margin: 0 auto;
+    position: relative;
+    padding: 0;
+    text-shadow: 0px 1px 0 #a2a2a2;
+  }
+  
+  .rating-upper {
+    color: #e7711b;
+    padding: 0;
+    position: absolute;
+    z-index: 1;
+    display: flex;
+    top: 0;
+    left: 0;
+    overflow: hidden;
+  }
+  
+  .rating-lower {
+    padding: 0;
+    display: flex;
+    z-index: 0;
+  }
+  
+  </style>
+  
+  <style>
+    .rate {
+    display: inline-block;
+    border: 0;
+    }
+    .rate > input {
+        display: none;
+    }
+    .rate > label {
+        float: right;
+    }
+    .rate > label:before {
+        display: inline-block;
+        font-size: 1.5rem;
+        padding: .3rem .2rem;
+        margin: 0;
+        cursor: pointer;
+        font-family: FontAwesome;
+        content: "\f005 "; 
+    }
+    .rate > label:last-child:before {
+        content: "\f006 "; 
+    }
+    .rate .half:before {
+        content: "\f089 ";
+        position: absolute;
+        padding-right: 0;
+    }
+    input:checked ~ label, 
+    label:hover, label:hover ~ label { color: #e7711b;  } 
+
+    input:checked + label:hover, input:checked ~ label:hover,
+    input:checked ~ label:hover ~ label, 
+    label:hover ~ input:checked ~ label { color: rgb(235, 160, 55);  } 
+
+  </style>
+
+<div class="col-md-5">
+						<div class="product-details">
+							<h2 class="product-name">{{book.10}}</h2>
+							<p>&nbsp;&nbsp;&nbsp;&nbsp;{{book.2}}</p>
+							<br>
+							<div>
+								<b>Average Rating:</b>
+							<div class="rating">
+								
+								<div class="rating-upper" style="width: 200px">
+                              <span>★</span>
+                              <span>★</span>
+                              <span>★</span>
+                              <span>★</span>
+                              <span>★</span>
+                          </div>
+                          <div class="rating-lower">
+                              <span>★</span>
+                              <span>★</span>
+                              <span>★</span>
+                              <span>★</span>
+                              <span>★</span>
+                          </div>
+							</div>		
+								
+							</div>
+							<br>
+							<b>Total Ratings:</b> &nbsp;&nbsp;&nbsp;{{book.8}}<br>
+							<b>Author:</b> &nbsp;&nbsp;&nbsp;{{book.1}}<br>
+							<b>Genre:</b>&nbsp;&nbsp;&nbsp; {{book.11}}</h5><br>
+							<b>Format:</b> &nbsp;&nbsp;&nbsp;{{book.4}}</h5><br>	
+							<b>Edition:</b>&nbsp;&nbsp;&nbsp;{{book.3}}</h5><br>
+							<b>Price:</b>&nbsp;&nbsp;&nbsp;Rs. {{book.6}}</h5><br>
+							
+
+							{% if test.0 %}    
+                  <tr><td><b>Given Rating  </b> </td><td>:</td><td> 
+                    <div class="rating mb-2">
+                        <div class="rating-upper" style="width: 200px">
+                            <span>★</span>
+                            <span>★</span>
+                            <span>★</span>
+                            <span>★</span>
+                            <span>★</span>
+                        </div>
+                        <div class="rating-lower">
+                            <span>★</span>
+                            <span>★</span>
+                            <span>★</span>
+                            <span>★</span>
+                            <span>★</span>
+                        </div>
+                    </div><td></tr>  
+              </table>                         
+                  {% else %}
+                  <tr><td><b>Give Rating  </b> </td><td>:</td><td> 
+                    <form class="text-center" method="POST">
+                    	{% csrf_token %}
+                        <fieldset class="rate">
+                            <input type="radio" id="rating10" name="rating" value="5" /><label for="rating10" title="5 stars"></label>
+                            <input type="radio" id="rating8" name="rating" value="4" /><label for="rating8" title="4 stars"></label>
+                            <input type="radio" id="rating6" name="rating" value="3" /><label for="rating6" title="3 stars"></label>
+                            <input type="radio" id="rating4" name="rating" value="2" /><label for="rating4" title="2 stars"></label>
+                            <input type="radio" id="rating2" name="rating" value="1" /><label for="rating2" title="1 star"></label>
+                            <input type="radio" id="rating1" name="rating" value="0.5" /><label class="half" for="rating1" title="1/2 star"></label>
+                        
+                        </fieldset>
+                     
+                  </td></tr>
+                  
+              </table> 
+              <input type="hidden" name="link" value="bookInfo">
+              <input type="hidden" name="bookId" value="{{book.0}}">
+               <br/>
+               <br/>  
+              <button class="btn btn-outline-secondary btn-primary"  type="submit">Submit</button>
+                      
+            </form> 
+            {% endif %}
+							
+
+							
+						</div>
+					</div>
+					{% endfor %}
+
+					<div class="col-md-12">
+						<div class="section-title text-center">
+							<h3 class="title">Simmilar Books</h3>
+						</div>
+					</div>
+
+					<div class="col-md-12">
+						<div class="row">
+							<div class="products-tabs">
+								<div id="tab1" class="tab-pane active">
+									<div class="products-slick" data-nav="#slick-nav-1">
+										{% for book in viewbook1 %}	
+										<div class="product">
+											<div class="product-img">
+												<img src="{{book.12}}" alt="">
+											</div>
+											<div class="product-body">
+												<p class="product-category">{{book.1}}</p>
+												<h3 class="product-name"><a href="#">{{book.10}}</a></h3>
+											</div>
+											<div class="add-to-cart">
+											
+											<form method="POST">
+												{% csrf_token %}
+												<button class="add-to-cart-btn" type="hidden" name="viewbook" value="{{book.0}}"><i class="fa fa-eye"></i>View Book Details</button>
+											</form>
+											</div>
+										</div>											
+										{% endfor %}
+										
+									</div>
+									<div id="slick-nav-1" class="products-slick-nav"></div>
+								</div>
+							</div>
+						</div>
+					</div>
+					<div class="col-md-12">
+						<div id="product-tab">
+							<div class="tab-content">
+								<div id="tab1" class="tab-pane fade in active">
+									<div class="row">
+										<div class="col-md-12">
+											<p>{{bookdec.1}}</p>
+										</div>
+									</div>
+								</div>
+								<div id="tab2" class="tab-pane fade in">
+									<div class="row">
+										<div class="col-md-12">
+											<p>{{bookdesc.2}}</p>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="section">
+			<div class="container">
+				</div>
+			</div>
+		</div>
+		{%endblock%}

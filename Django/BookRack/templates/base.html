@@ -1,0 +1,64 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+
+		<title> Book Recommndation</title>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+		<link href="https://fonts.googleapis.com/css?family=Montserrat:400,500,700" rel="stylesheet">
+		<link type="text/css" rel="stylesheet" href="{% static '/css/bootstrap.min.css' %}"/>
+		<link type="text/css" rel="stylesheet" href="{% static '/css/slick.css' %}"/>
+		<link type="text/css" rel="stylesheet" href="{% static 'css/slick-theme.css' %}"/>
+		<link type="text/css" rel="stylesheet" href="{% static 'css/nouislider.min.css' %}"/>
+		<link rel="stylesheet" href="{% static 'css/font-awesome.min.css' %}">
+        <link type="text/css" rel="stylesheet" href="{% static 'css/style.css' %}"/>
+        <script src="http://code.jquery.com/jquery-1.9.1.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/js/toastr.min.js"></script>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/css/toastr.css"/> 
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/css/toastr.min.css"/>
+        {% block login %}
+        {% endblock %}
+	
+    </head>
+	<body>
+		<header>
+			<div id="top-header">
+				<div class="container">
+					<ul class="header-links pull-right">
+						<li class="active"><a href="{% url 'index' %}">Home</a></li>
+						{% block navbar %}
+                        {% endblock %}
+					</ul>
+				</div>
+			</div>
+
+            {% block blk %}
+            {% endblock %}
+            <footer id="footer">
+                <div class="section">
+                    <div class="container">
+                        <div class="row">
+                                <div class="footer">
+                                    <h3 class="footer-title">About Us</h3>
+                                    <li>Nguyễn Văn Phong</li>
+                                    <li>Phan Minh Tiến</li>
+                                    <li>Lê Văn Trung</li>
+                                </div>
+                        </div>
+                    </div>
+                </div>
+            </footer>
+    
+            <script src="{% static 'js/jquery.min.js' %}"></script>
+            <script src="{% static 'js/bootstrap.min.js'%}"></script>
+            <script src="{% static 'js/slick.min.js'%}"></script>
+            <script src="{% static 'js/nouislider.min.js'%}"></script>
+            <script src="{% static 'js/jquery.zoom.min.js'%}%"></script>
+            <script src="{% static 'js/main.js'%}"></script>
+    
+        </body>
+    </html>
+    
