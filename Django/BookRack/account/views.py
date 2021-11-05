@@ -10,10 +10,10 @@ from django.http import HttpResponseRedirect, HttpResponse
 
 # Create your views here.
 def userEntry(Fname,Lname,password,Email):
-    userData=pd.read_csv("D:\\courses\\01 - Học code\\24 - Data mining\\Data Mining Book Store\\Book-recommender-system\\Django\\BookRack\\account\\users.csv",engine="python")
+    userData=pd.read_csv("./account/users.csv",engine="python")
     userId=int(userData['userId'].max())+1
     row=[userId,Fname,Lname,0,Email,password,0]
-    with open('D:\\courses\\01 - Học code\\24 - Data mining\\Data Mining Book Store\\Book-recommender-system\\Django\\BookRack\\account\\users.csv', 'a+', newline='') as write_obj:
+    with open('users.csv', 'a+', newline='') as write_obj:
         csv_writer = writer(write_obj)
         csv_writer.writerow(row)
 
@@ -22,7 +22,7 @@ def login(request):
     if request.method == 'POST':
         email = request.POST['username']
         password = request.POST['password']
-        userData=pd.read_csv("D:\\courses\\01 - Học code\\24 - Data mining\\Data Mining Book Store\\Book-recommender-system\\Django\\BookRack\\account\\users.csv",engine="python")
+        userData=pd.read_csv("./account/users.csv",engine="python")
         userData=userData.values.tolist()
         for i in userData:
             if(i[4] == email and i[5] == password):

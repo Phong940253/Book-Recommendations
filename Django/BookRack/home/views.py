@@ -23,7 +23,7 @@ def round_up(value):
     return int(math.floor(value))
 
 def rated(userId,bookId):
-    ratings = pd.read_csv("D:\\courses\\01 - Học code\\24 - Data mining\\Data Mining Book Store\\Book-recommender-system\\Django\\BookRack\\home\\ratings.csv", engine="python")
+    ratings = pd.read_csv("./home/ratings.csv", engine="python")
     ratings=ratings[ratings["user_id"]==int(userId)]
     ratings=ratings.values.tolist()
     j=0
@@ -47,7 +47,7 @@ def rated(userId,bookId):
     return l 
 
 def giveRating(rating,userId,bookId):
-    ratings = pd.read_csv("D:\\courses\\01 - Học code\\24 - Data mining\\Data Mining Book Store\\Book-recommender-system\\Django\\BookRack\\home\\ratings.csv", engine="python")
+    ratings = pd.read_csv("./home/ratings.csv", engine="python")
     ratings=ratings[ratings["user_id"]==int(userId)]
     ratings=ratings.values.tolist()
     j=0
@@ -58,12 +58,12 @@ def giveRating(rating,userId,bookId):
             break
     if  not flag:
         row=[int(userId),int(bookId),rating]
-        with open("D:\\courses\\01 - Học code\\24 - Data mining\\Data Mining Book Store\\Book-recommender-system\\Django\\BookRack\\home\\ratings.csv", 'a+', newline='') as write_obj:
+        with open("./home/ratings.csv", 'a+', newline='') as write_obj:
             csv_writer = writer(write_obj)
             csv_writer.writerow(row)
 
 def recommend(bookid):
-    book_description = pd.read_csv("D:\\courses\\01 - Học code\\24 - Data mining\\Data Mining Book Store\\Book-recommender-system\\Django\\BookRack\\home\\book_data2.csv",engine="python")
+    book_description = pd.read_csv("./home/book_data2.csv",engine="python")
     books_tfidf = TfidfVectorizer(stop_words='english')
     book_description['book_desc'] = book_description['book_desc'].fillna('')
     book_description_matrix = books_tfidf.fit_transform(book_description['book_desc'])
@@ -89,10 +89,10 @@ def index(request,booktitle=None,bookauthor=None):
         rbooks={}
         rbooks1=[]
         top1=[]
-        mydata=pd.read_csv("D:\\courses\\01 - Học code\\24 - Data mining\\Data Mining Book Store\\Book-recommender-system\\Django\\BookRack\\home\\book_data2.csv",engine="python")
+        mydata=pd.read_csv("./home/book_data2.csv",engine="python")
         top=mydata.head(20)
 
-        ratings = pd.read_csv("D:\\courses\\01 - Học code\\24 - Data mining\\Data Mining Book Store\\Book-recommender-system\\Django\\BookRack\\home\\ratings.csv",engine="python")
+        ratings = pd.read_csv("./home/ratings.csv",engine="python")
         d = (ratings.groupby('user_id')['book_id','rating'].apply(lambda x: dict(x.values)).to_dict())
 
         uname=request.session["loginuser"]
@@ -134,7 +134,7 @@ def index(request,booktitle=None,bookauthor=None):
             
             
             #content based filtering
-            book_description = pd.read_csv("D:\\courses\\01 - Học code\\24 - Data mining\\Data Mining Book Store\\Book-recommender-system\\Django\\BookRack\\home\\book_data2.csv", encoding = 'latin-1')
+            book_description = pd.read_csv("./home/book_data2.csv", encoding = 'latin-1')
             books_tfidf = TfidfVectorizer(stop_words='english')
             book_description['book_desc'] = book_description['book_desc'].fillna('')
             book_description_matrix = books_tfidf.fit_transform(book_description['book_desc'])
@@ -165,7 +165,7 @@ def index(request,booktitle=None,bookauthor=None):
             
             
             #content based filtering
-            book_description = pd.read_csv("D:\\courses\\01 - Học code\\24 - Data mining\\Data Mining Book Store\\Book-recommender-system\\Django\\BookRack\\home\\book_data2.csv", encoding = 'latin-1')
+            book_description = pd.read_csv("./home/book_data2.csv", encoding = 'latin-1')
             books_tfidf = TfidfVectorizer(stop_words='english')
             book_description['book_desc'] = book_description['book_desc'].fillna('')
             book_description_matrix = books_tfidf.fit_transform(book_description['book_desc'])
@@ -207,8 +207,8 @@ def wishlist(request):
         viewdata1=[]
         uname=request.session["loginuser"]
         userId=request.session["userId"]
-        ratings = pd.read_csv("D:\\courses\\01 - Học code\\24 - Data mining\\Data Mining Book Store\\Book-recommender-system\\Django\\BookRack\\home\\ratings.csv",engine="python")
-        books = pd.read_csv("D:\\courses\\01 - Học code\\24 - Data mining\\Data Mining Book Store\\Book-recommender-system\\Django\\BookRack\\home\\book_data2.csv", encoding = 'latin-1')
+        ratings = pd.read_csv("./home/ratings.csv",engine="python")
+        books = pd.read_csv("./home/book_data2.csv", encoding = 'latin-1')
         ratings = ratings[ratings["user_id"]==userId]
         for bookID in ratings["book_id"]:
             viewdata=books[books["book_id"]== bookID]
