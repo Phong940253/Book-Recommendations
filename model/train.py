@@ -86,14 +86,15 @@ class BookDataset(InMemoryDataset):
         grouped = n_voting.groupby('User-ID')
         for user_id, group in tqdm(grouped):
             user_book_id = book_id_encoder.transform(group['ISBN'])
+            group['ISBN'] = book_id_encoder.transform(group['ISBN'])
             group = group.reset_index(drop=True)
             group['user_book_id'] = user_book_id
-            print("\nuser book id: ", user_book_id)
-            print(group)
+            # print("\nuser book id: ", user_book_id)
             node_features = group.loc[group['User-ID'] == user_id,
                                       ['user_book_id', 'ISBN', "Book-Title", 'Book-Author', 'Year-Of-Publication', 'Publisher', 'Age', 'Location']].sort_values('user_book_id')[['ISBN', "Book-Title", 'Book-Author', 'Year-Of-Publication', 'Publisher', 'Age', 'Location']].values
-            print(node_features)
+            # node_features = node_features.astype('float')
             node_features = torch.from_numpy(node_features)
+            # print(node_features)
             target_nodes = group['user_book_id'].values[1:]
             source_nodes = group['user_book_id'].values[:-1]
 
