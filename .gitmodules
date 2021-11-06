@@ -1,3 +1,6 @@
 [submodule "GNN-RecSys"]
 	path = GNN-RecSys
 	url = git@github.com:Phong940253/GNN-RecSys.git
+[submodule "pygcn"]
+	path = pygcn
+	url = https://github.com/Phong940253/pygcn.git
