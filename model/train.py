@@ -9,6 +9,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 from torch_geometric.nn import GCNConv, TopKPooling, global_mean_pool as gap, global_max_pool as gmp
 from sklearn.preprocessing import LabelEncoder, OrdinalEncoder
+import torch
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 
@@ -210,3 +211,5 @@ for epoch in range(100):
     test_acc = evaluate(test_loader)
     print('Epoch: {:03d}, Loss: {:.5f}, Train Auc: {:.5f}, Val Auc: {:.5f}, Test Auc: {:.5f}'.
           format(epoch, loss, train_acc, val_acc, test_acc))
+
+torch.save(model.state_dict(), "weight.pt")
