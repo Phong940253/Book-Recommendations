@@ -33,8 +33,8 @@ users = pd.read_csv("../pygcn/data/BX-Users.csv",
 
 book_id_encoder = LabelEncoder()
 book_id_encoder.fit(pd.concat([books['ISBN'], voting['ISBN']]))
-# books['ISBN'] = book_id_encoder.transform(books['ISBN'])
-# voting['ISBN'] = book_id_encoder.transform(voting['ISBN'])
+books['ISBN'] = book_id_encoder.transform(books['ISBN'])
+voting['ISBN'] = book_id_encoder.transform(voting['ISBN'])
 
 book_title_encoder = LabelEncoder()
 books['Book-Title'] = book_title_encoder.fit_transform(books['Book-Title'])
@@ -74,7 +74,6 @@ class BookDataset(InMemoryDataset):
         return ['data.pt']
 
     def download(self):
-        # Download to `self.raw_dir`.
         pass
 
     def process(self):
@@ -85,15 +84,17 @@ class BookDataset(InMemoryDataset):
     
         grouped = n_voting.groupby('User-ID')
         for user_id, group in tqdm(grouped):
-            user_book_id = book_id_encoder.transform(group['ISBN'])
-            group['ISBN'] = book_id_encoder.transform(group['ISBN'])
-            group = group.reset_index(drop=True)
+            user_book_id = group['ISBN'].copy()
+            # user_book_id.fillna(0, inplace=True)
+            # group['ISBN'] = book_id_encoder.transform(group['ISBN'])
+            # group = group.reset_index(drop=True)
             group['user_book_id'] = user_book_id
+            # print(group, user_book_id)
             # print("\nuser book id: ", user_book_id)
             node_features = group.loc[group['User-ID'] == user_id,
                                       ['user_book_id', 'ISBN', "Book-Title", 'Book-Author', 'Year-Of-Publication', 'Publisher', 'Age', 'Location']].sort_values('user_book_id')[['ISBN', "Book-Title", 'Book-Author', 'Year-Of-Publication', 'Publisher', 'Age', 'Location']].values
             # node_features = node_features.astype('float')
-            node_features = torch.from_numpy(node_features)
+            node_features = torch.from_numpy(node_features).to(device).long()
             # print(node_features)
             target_nodes = group['user_book_id'].values[1:]
             source_nodes = group['user_book_id'].values[:-1]
@@ -165,11 +166,11 @@ class CUSConv(MessagePassing):
 class Net(torch.nn.Module):
     def __init__(self):
         super(Net, self).__init__()
-        self.conv1 = CUSConv(embed_dim, 128)
+        self.conv1 = GCNConv(embed_dim, 128)
         self.pool1 = TopKPooling(128, ratio=0.8)
-        self.conv2 = CUSConv(128, 128)
+        self.conv2 = GCNConv(128, 128)
         self.pool2 = TopKPooling(128, ratio=0.8)
-        self.conv3 = CUSConv(128, 128)
+        self.conv3 = GCNConv(128, 128)
         self.pool3 = TopKPooling(128, ratio=0.8)
         self.item_embedding = torch.nn.Embedding(
             num_embeddings=voting['ISBN'].max() + 1, embedding_dim=embed_dim)
@@ -179,7 +180,7 @@ class Net(torch.nn.Module):
         self.bn1 = torch.nn.BatchNorm1d(128)
         self.bn2 = torch.nn.BatchNorm1d(64)
         self.act1 = torch.nn.ReLU()
-        self.act2 = torch.nn.ReLU()
+        # self.act2 = torch.nn.ReLU()
 
     def forward(self, data):
         x, edge_index, batch = data.x, data.edge_index, data.batch
