@@ -35,7 +35,6 @@ book_id_encoder = LabelEncoder()
 book_id_encoder.fit(pd.concat([books['ISBN'], voting['ISBN']]))
 books['ISBN'] = book_id_encoder.transform(books['ISBN'])
 voting['ISBN'] = book_id_encoder.transform(voting['ISBN'])
-
 book_title_encoder = LabelEncoder()
 books['Book-Title'] = book_title_encoder.fit_transform(books['Book-Title'])
 
@@ -166,24 +165,25 @@ class CUSConv(MessagePassing):
 class Net(torch.nn.Module):
     def __init__(self):
         super(Net, self).__init__()
-        self.conv1 = GCNConv(embed_dim, 128)
+        self.conv1 = CUSConv(embed_dim, 128)
         self.pool1 = TopKPooling(128, ratio=0.8)
-        self.conv2 = GCNConv(128, 128)
+        self.conv2 = CUSConv(128, 128)
         self.pool2 = TopKPooling(128, ratio=0.8)
-        self.conv3 = GCNConv(128, 128)
+        self.conv3 = CUSConv(128, 128)
         self.pool3 = TopKPooling(128, ratio=0.8)
         self.item_embedding = torch.nn.Embedding(
-            num_embeddings=voting['ISBN'].max() + 1, embedding_dim=embed_dim)
+            num_embeddings=len(voting['ISBN']) + 1, embedding_dim=embed_dim)
         self.lin1 = torch.nn.Linear(256, 128)
         self.lin2 = torch.nn.Linear(128, 64)
         self.lin3 = torch.nn.Linear(64, 1)
         self.bn1 = torch.nn.BatchNorm1d(128)
         self.bn2 = torch.nn.BatchNorm1d(64)
         self.act1 = torch.nn.ReLU()
-        # self.act2 = torch.nn.ReLU()
+        self.act2 = torch.nn.ReLU()
 
     def forward(self, data):
         x, edge_index, batch = data.x, data.edge_index, data.batch
+        # print(x[0])
         x = self.item_embedding(x)
         x = x.squeeze(1)
 
