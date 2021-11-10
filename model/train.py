@@ -9,103 +9,12 @@ import torch.nn as nn
 import torch.nn.functional as F
 from torch_geometric.nn import GCNConv, TopKPooling, global_mean_pool as gap, global_max_pool as gmp
 from sklearn.preprocessing import LabelEncoder, OrdinalEncoder
+from dataset import BookDataset
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 
-def encode_onehot(labels):
-    classes = set(labels)
-    classes_dict = {c: np.identity(len(classes))[i, :] for i, c in
-                    enumerate(classes)}
-    labels_onehot = np.array(list(map(classes_dict.get, labels)),
-                             dtype=np.int32)
-    return labels_onehot
 
-
-voting = pd.read_csv("../pygcn/data/BX-Book-Ratings.csv",
-                     sep=';', encoding="ISO-8859-1")
-books = pd.read_csv("../pygcn/data/BX_Books.csv",
-                    sep=';', encoding="ISO-8859-1")
-users = pd.read_csv("../pygcn/data/BX-Users.csv",
-                    sep=';', encoding="ISO-8859-1")
-
-book_id_encoder = LabelEncoder()
-book_id_encoder.fit(pd.concat([books['ISBN'], voting['ISBN']]))
-books['ISBN'] = book_id_encoder.transform(books['ISBN'])
-voting['ISBN'] = book_id_encoder.transform(voting['ISBN'])
-
-book_title_encoder = LabelEncoder()
-books['Book-Title'] = book_title_encoder.fit_transform(books['Book-Title'])
-
-book_publisher_encoder = LabelEncoder()
-books['Publisher'].fillna("", inplace=True)
-
-books['Publisher'] = book_publisher_encoder.fit_transform(
-    books['Publisher'])
-
-user_location_encoder = LabelEncoder()
-users['Location'] = user_location_encoder.fit_transform(users['Location'])
-
-users['Age'].fillna(0, inplace=True)
-
-books['Year-Of-Publication'].fillna(0, inplace=True)
-
-# print(voting.head())
-# voting_encoder = OrdinalEncoder()
-# voting['Book-Rating'] = voting_encoder.fit_transform(voting['Book-Rating'])
-
-
-class BookDataset(InMemoryDataset):
-    def __init__(self, root, transform=None, pre_transform=None):
-        super(BookDataset, self).__init__(root, transform, pre_transform)
-        self.data, self.slices = torch.load(self.processed_paths[0])
-
-    @property
-    def raw_file_names(self):
-        return []
-
-    @property
-    def processed_file_names(self):
-        return ['data.pt']
-
-    def download(self):
-        # Download to `self.raw_dir`.
-        pass
-
-    def process(self):
-        # Read data into huge `Data` list.
-        data_list = []
-        global voting
-        book_voting = voting.merge(books, on="ISBN")
-        user_voting = book_voting.merge(users, on="User-ID")
-
-        grouped = user_voting.groupby('User-ID')
-        for user_id, group in tqdm(grouped):
-            user_book_id = LabelEncoder().fit_transform(group['ISBN'])
-            group = group.reset_index(drop=True)
-            group['user_book_id'] = user_book_id
-            # print("\nuser book id: ", type(user_book_id))
-            # print(group)
-
-            node_features = group.loc[group['User-ID'] == user_id,
-                                      ['user_book_id', 'ISBN']].sort_values('user_book_id').ISBN.drop_duplicates().values
-            print("node_features ", node_features)
-            print("group ", group)
-            node_features = torch.LongTensor(node_features).unsqueeze(1)
-            target_nodes = group['user_book_id'].values[1:]
-            source_nodes = group['user_book_id'].values[:-1]
-            print("node ", target_nodes, source_nodes)
-            edge_index = torch.tensor(
-                [source_nodes, target_nodes], dtype=torch.long)
-            x = node_features
-            y = torch.IntTensor([group['Book-Rating'].values[0]])
-            data = Data(x=x, edge_index=edge_index, y=y)
-            data_list.append(data)
-
-        data, slices = self.collate(data_list)
-        torch.save((data, slices), self.processed_paths[0])
-
-
-dataset = BookDataset("")
+dataset = BookDataset(root="./data")
 loader = DataLoader(dataset, batch_size=512, shuffle=True)
 
 train_dataset = dataset[:round(len(dataset) * 0.8)]
@@ -130,8 +39,6 @@ class Net(torch.nn.Module):
         self.pool2 = TopKPooling(128, ratio=0.8)
         self.conv3 = GCNConv(128, 128)
         self.pool3 = TopKPooling(128, ratio=0.8)
-        self.item_embedding = torch.nn.Embedding(
-            num_embeddings=voting['ISBN'].max() + 1, embedding_dim=embed_dim)
         self.lin1 = torch.nn.Linear(256, 128)
         self.lin2 = torch.nn.Linear(128, 64)
         self.lin3 = torch.nn.Linear(64, 1)
@@ -142,8 +49,10 @@ class Net(torch.nn.Module):
 
     def forward(self, data):
         x, edge_index, batch = data.x, data.edge_index, data.batch
-        x = self.item_embedding(x)
-        x = x.squeeze(1)
+        print(x)
+        print(edge_index)
+        # x = self.item_embedding(x)
+        # x = x.squeeze(1)
 
         x = F.relu(self.conv1(x, edge_index))
 
@@ -168,7 +77,8 @@ class Net(torch.nn.Module):
         x = self.act2(x)
         x = F.dropout(x, p=0.5, training=self.training)
 
-        x = torch.sigmoid(self.lin3(x)).squeeze(1)
+        x = torch.sigmoid(self.lin3(x))
+        # .squeeze(1)
         return x
 
 
