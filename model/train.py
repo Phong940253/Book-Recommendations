@@ -12,9 +12,15 @@ from sklearn.preprocessing import LabelEncoder, OrdinalEncoder
 from dataset import BookDataset
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
+def merge_file(prefix_filename, num_files):
+    with open(prefix_filename, 'wb+') as f:
+        for idx in range(num_files):
+            with open(prefix_filename + '_part_' + str(idx + 1), 'rb') as chunk_file:
+                chunk = chunk_file.read()
+                f.write(chunk)
+merge_file('./dataset/processed/data.pt', 32)
 
-
-dataset = BookDataset(root="./data")
+dataset = BookDataset(root="./dataset")
 loader = DataLoader(dataset, batch_size=512, shuffle=True)
 
 train_dataset = dataset[:round(len(dataset) * 0.8)]
@@ -28,7 +34,47 @@ test_loader = DataLoader(test_dataset, batch_size=512, shuffle=True)
 
 
 embed_dim = 128
+# voting = pd.read_csv(dataset.raw_paths[0],
+#                      sep=';', encoding="ISO-8859-1")
+# voting['ISBN'] = LabelEncoder().fit_transform(voting['ISBN'])
 
+class SAGEConv(MessagePassing):
+    def __init__(self, in_channels, out_channels):
+        super(SAGEConv, self).__init__(aggr='max') #  "Max" aggregation.
+        self.lin = torch.nn.Linear(in_channels, out_channels)
+        self.act = torch.nn.ReLU()
+        self.update_lin = torch.nn.Linear(in_channels + out_channels, in_channels, bias=False)
+        self.update_act = torch.nn.ReLU()
+        
+    def forward(self, x, edge_index):
+        # x has shape [N, in_channels]
+        # edge_index has shape [2, E]
+        
+        
+        edge_index, _ = remove_self_loops(edge_index)
+        edge_index, _ = add_self_loops(edge_index, num_nodes=x.size(0))
+        
+        
+        return self.propagate(edge_index, size=(x.size(0), x.size(0)), x=x)
+
+    def message(self, x_j):
+        # x_j has shape [E, in_channels]
+
+        x_j = self.lin(x_j)
+        x_j = self.act(x_j)
+        
+        return x_j
+
+    def update(self, aggr_out, x):
+        # aggr_out has shape [N, out_channels]
+
+
+        new_embedding = torch.cat([aggr_out, x], dim=1)
+        
+        new_embedding = self.update_lin(new_embedding)
+        new_embedding = self.update_act(new_embedding)
+        
+        return new_embedding
 
 class Net(torch.nn.Module):
     def __init__(self):
@@ -39,6 +85,7 @@ class Net(torch.nn.Module):
         self.pool2 = TopKPooling(128, ratio=0.8)
         self.conv3 = GCNConv(128, 128)
         self.pool3 = TopKPooling(128, ratio=0.8)
+        self.item_embedding = torch.nn.Embedding(num_embeddings=dataset.voting.ISBN.max() + 1, embedding_dim=embed_dim)
         self.lin1 = torch.nn.Linear(256, 128)
         self.lin2 = torch.nn.Linear(128, 64)
         self.lin3 = torch.nn.Linear(64, 1)
@@ -49,10 +96,11 @@ class Net(torch.nn.Module):
 
     def forward(self, data):
         x, edge_index, batch = data.x, data.edge_index, data.batch
+        
+        x = self.item_embedding(x)
+        x = x.squeeze(1)
         print(x)
         print(edge_index)
-        # x = self.item_embedding(x)
-        # x = x.squeeze(1)
 
         x = F.relu(self.conv1(x, edge_index))
 
