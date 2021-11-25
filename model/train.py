@@ -14,6 +14,8 @@ from dataset import BookDataset
 
 from torch_geometric.nn import MessagePassing
 from torch_geometric.utils import remove_self_loops, add_self_loops
+from sklearn.metrics import roc_auc_score
+
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 def merge_file(prefix_filename, num_files):
@@ -154,6 +156,11 @@ def evaluate(loader):
             predictions.append(pred)
             labels.append(label)
 
+    predictions = np.hstack(predictions)
+    labels = np.hstack(labels)
+    
+    return roc_auc_score(labels, predictions)
+
 
 def train():
     model.train()
@@ -181,5 +188,4 @@ for epoch in range(100):
     train_acc = evaluate(train_loader)
     val_acc = evaluate(valid_loader)
     test_acc = evaluate(test_loader)
-    print('Epoch: {:03d}, Loss: {:.5f}, Train Auc: {:.5f}, Val Auc: {:.5f}, Test Auc: {:.5f}'.
-          format(epoch, loss, train_acc, val_acc, test_acc))
+    print(f'Epoch: {epoch}, Loss: {loss}, Train Auc: {train_acc}, Val Auc: {val_acc}, Test Auc: {test_acc}')
