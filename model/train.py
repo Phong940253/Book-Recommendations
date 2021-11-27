@@ -11,7 +11,7 @@ import torch.nn.functional as F
 from torch_geometric.nn import GCNConv, TopKPooling, global_mean_pool as gap, global_max_pool as gmp
 from sklearn.preprocessing import LabelEncoder, OrdinalEncoder
 from dataset import BookDataset
-
+from sklearn.preprocessing import OneHotEncoder
 from torch_geometric.nn import MessagePassing
 from torch_geometric.utils import remove_self_loops, add_self_loops
 from sklearn.metrics import roc_auc_score
@@ -155,12 +155,24 @@ def evaluate(loader):
             label = data.y.detach().cpu().numpy()
             predictions.append(pred)
             labels.append(label)
-
+    
     predictions = np.hstack(predictions)
     labels = np.hstack(labels)
-    
-    return roc_auc_score(labels, predictions)
+    predictions = np.reshape(predictions, (-1, 1))
 
+    labels = np.reshape(labels, (-1, 1))
+
+    enc = OneHotEncoder(handle_unknown='ignore')
+    enc.fit(np.concatenate((labels, predictions), axis=0))
+    labels = enc.transform(labels)
+    predictions = enc.transform(predictions)
+
+    labels = labels.todense()
+    predictions = predictions.todense()
+    labels = np.asarray(labels)
+    predictions = np.asarray(predictions)
+    
+    return roc_auc_score(labels, predictions, multi_class='ovo')
 
 def train():
     model.train()
