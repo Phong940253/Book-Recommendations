@@ -97,7 +97,7 @@ class Net(torch.nn.Module):
         self.item_embedding = torch.nn.Embedding(num_embeddings=dataset.voting.ISBN.max() + 1, embedding_dim=embed_dim)
         self.lin1 = torch.nn.Linear(256, 128)
         self.lin2 = torch.nn.Linear(128, 64)
-        self.lin3 = torch.nn.Linear(64, 1)
+        self.lin3 = torch.nn.Linear(64, 11)
         self.bn1 = torch.nn.BatchNorm1d(128)
         self.bn2 = torch.nn.BatchNorm1d(64)
         self.act1 = torch.nn.ReLU()
@@ -151,6 +151,7 @@ def evaluate(loader):
 
             data = data.to(device)
             pred = model(data).detach().cpu().numpy()
+            print(pred)
 
             label = data.y.detach().cpu().numpy()
             predictions.append(pred)
@@ -182,8 +183,10 @@ def train():
         data = data.to(device)
         optimizer.zero_grad()
         output = model(data)
+        output = output.to(device)
+
         label = data.y.to(device)
-        loss = crit(output.type(torch.FloatTensor), label.type(torch.FloatTensor))
+        loss = crit(output, label.type(torch.long))
         loss.backward()
         loss_all += data.num_graphs * loss.item()
         optimizer.step()
@@ -193,7 +196,7 @@ def train():
 
 model = Net().to(device)
 optimizer = torch.optim.Adam(model.parameters(), lr=0.003)
-crit = torch.nn.BCELoss()
+crit = torch.nn.CrossEntropyLoss()
 
 for epoch in range(100):
     loss = train()
